@@ -277,24 +277,59 @@ System.out.println(5 > 3 ? "true 리턴해줘" : "false 리턴해줘"); // true 
 
 swtich 연산자는 조건에 따라 분기해야할 내용이 많아질 경우, 가독성과 실행 속도 측면에서 사용할 수 있다.
 
-- 자바12부터는 
-  - 쉼표( , )를 사용하여 여러 케이스를 한 줄에 나열할 수 있다. 
-  - 화살표 ( -> )를 사용하여 결과를 반환할 수 있으며 break 키워드를 사용하지 않아도 된다.
-- 자바13부터는 
-  - yield 키워드를 사용하여 switch 결과를 반환할 수 있다.
+```
+int result;
+switch (str) {
+    case a:
+        result = 1;
+        break;
+    case b:
+        result = 2;
+        break;
+    case c:
+        result = 3;
+        break;
+};
+return result;
+```
+위의 switch 문의 사용방식이 전통적인 switch문의 문법이다.
 
+이는 몇가지 문제점이 있는데 **break 키워드 쓰는 것을 잊었을 경우 그 아래있는 코드 블럭이 실행**된다는 것과 **하나의 case에는 하나의 값만 비교**할 수 있다는 것이다.
+자바 12, 13부터는 위 방식의 문제점을 개선한 새로운 기능들이 추가되었다.
+
+- 자바12부터는 
+  - **쉼표( , )를 사용**하여 여러 케이스를 한 줄에 나열할 수 있다. 
+  - **화살표 ( -> )를 사용**하여 결과를 반환할 수 있으며 break 키워드를 사용하지 않아도 된다.
+- 자바13부터는 
+  - **yield 키워드를 사용**하여 switch 결과를 반환할 수 있다.
+  - **scope**를 사용하여 case-level의 scope를 이용할 수 있다.
+
+#### 쉼표 사용
 ```
 private static int switchWithMultiCase(String str) {
     int result;
     switch (str) {
         case "a":
             result = 1;
+            break;
         case "b","c"
             result = 2;
+            break;
     };
     return result;
 }
+```
 
+#### 화살표 사용
+switch문과 함께 화살표 연산자(->)를 사용할 수 있다. 화살표 연산자를 사용하면 **break은 사용할 필요가 없다**.
+
+화살표 연산자의 우변에 올 수 있는 것은 다음과 같다.
+
+- Statement / expression
+- throw statement
+- {} block
+
+```
 private static int switchWithArrow(String str) {
     int result = switch (str) {
         case "a", "b" -> 1;
@@ -304,18 +339,45 @@ private static int switchWithArrow(String str) {
         };
     return result;
 }
+```
 
+#### yield 키워드 사용
+Java 13부터는 yield라는 키워드를 통해 switch문이 값을 반환할 수 있게 되었다. 
+따라서 switch문을 식으로도 사용이 가능하게 되었다. **yield 키워드가 값을 반환**하면서 switch문을 끝내므로 **break은 사용할 필요가 없다**.
+```
 private static int switchWithYield(String str) {
     int result = switch (str) {
         case "a", "b":
             yield 1;
         case "c":
             yield 2;
-        case "d", "e", "f" : {
+        case "d", "e", "f" :
             yield 3;
-        }
         default:
             yield -1;
+    };
+    return result;
+}
+```
+
+#### scope 사용
+Java 13부터 switch문의 각 case에 {}을 쓸 수 있게되어, case-level의 scope를 사용할 수 있게 되었다.
+```
+private static int switchWithScope(String str) {
+    int result;
+    switch (str) {
+        case "a": {
+            result = 1;
+            break;
+        }
+        case "b": {
+            result = 2;
+            break;
+        }
+        case "c", "d": {
+            result = 3;
+            break;
+        }
     };
     return result;
 }
