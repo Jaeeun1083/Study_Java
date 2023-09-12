@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.Scanner;
 
 public class Main_02_평균_구하기 {

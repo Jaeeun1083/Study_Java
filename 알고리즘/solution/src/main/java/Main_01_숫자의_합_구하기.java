@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.Scanner;
 
 public class Main_01_숫자의_합_구하기 {
