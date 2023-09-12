@@ -111,11 +111,12 @@ JIT 컴파일러는 인터프리터 방식의 단점을 보완하기 위해 도�
 ---------------------------------
 # JVM 구성 요소
 
-<img src="https://w.namu.la/s/1eb7f7a28c018c5f01e585756e72aa9dd3a7d87344754f0a6fd20dc7590ea7dc349477a930ed223f717f5599e49930adffb5bdf87a35dff38bce1b940a9ddfb654440570839da857c68163322221b179dd48ac247ceb96bd19ed9960f97c1160" width="600px"/>
+<img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FcQRqku%2Fbtru0vJ6Ixx%2F9qCTW7ChXc80fGfQUrT4B0%2Fimg.png" width="500px"/>
 
 출처 : https://namu.wiki/w/%EC%9E%90%EB%B0%94%20%EA%B0%80%EC%83%81%20%EB%A8%B8%EC%8B%A0
 
 JVM의 구성요소는 크게 3가지로 나눌 수 있다.
+
 | 구성 요소 |	설명 |
 |-------|-------------|
 | Class Loader | 클래스를 Runtime Data Area에 적재한다. |
@@ -124,42 +125,79 @@ JVM의 구성요소는 크게 3가지로 나눌 수 있다.
 
 <br/>
 
-- **Class Loader Subsystem**
-  
-  : 런타임 시점에 클래스를 로딩한다. 인스턴스가 생성이 되면 Class Loader를 통해 메모리에 적재된다.
-  세부적으로는 아래와 같은 과정을 거쳐 클래스 파일을 로딩한다.
-  <!-- - **loading**
-    - bootstrap class loader : 가장 먼저 실행되는 클래스 로더이다. 자바 실행에 기본적으로 필요한 클래스를 로딩한다.
-    - extension class loader : 추가적인 기능들을 위한 클래스들을 로딩한다.(폴더 내부에 있는 클래스와 같은)
-    - application class loader : classpath나 jar파일 내에 환경변수로 지정된 폴더 내 클래스를 로딩한다. 
-  - **linking**
-    - verify : 읽어들인 바이트코드가 적절한지 확인한다. 실패시 java.lang.verifyError를 리턴
-    - prepare : static 변수들에 메모리가 할당되고 타입에 따라 기본값을 할당한다.
-    - resolve : 클래스의 constant pool 내의 모든 symbolic reference를 dirce reference로 바꾼다.
-  - **initialization** : static 변수들이 할당되고 static block이 실행된다. -->
+## Class Loader
+- 런타임 시점에 클래스를 로딩한다. 인스턴스가 생성이 되면 Class Loader를 통해 메모리에 적재된다.
+- 세부적으로는 크게 `Loading` (클래스 파일 탑재), `Linking` (클래스 파일을 사용하기 위해 검증하고, 기본 값으로 초기화), 그리고 `Initialization` (static field 의 값들을 정의한 값으로 초기화) 과정을 거쳐 클래스 파일을 로딩한다.
 
-- **Runtime Data Areas**
-    : JVM이 바이트코드를 실행하기 위해 사용하는 (OS로부터 별도로 할당 받은) 메모리 공간이다. 
+#### Loading (클래스 파일 탑재)
 
-    - 모든 스레드가 공유
-        - **method Area**
-        : 클래스로더가 클래스 파일을 읽어왔을 때 클래스에 있는 정보를 파싱해서 저장한다. (변수, 메서드, 정적 변수 ... )
-        - **heap**
-        : 런타임시, 동적으로 할당하여 사용하는 영역이다. 프로그램을 실행하면서 생성한 모든 객체 인스턴스를 저장한다.
+- 각각의 클래스 파일들이 기본으로 제공받는 클래스 파일인지 혹은 개발자가 정의한 클래스 파일인지와 같은 기준에 의해서 ClassLoader 의 수준도 세 가지로 나뉜다.
 
-    - 각각의 스레드에 존재
-        - **Program Counter Register** 
-        : 각 스레드는 메서드를 실행하고 있고 pc는 그 메서드 안에서 몇 번째 줄을 실행해야 하는지 나타내는 역할 
-        - **Stack** 
-        : 자바 스택은 스레드 별로 1개만 존재하고 스택 프레임은 메서드가 호출될 때마다 생성된다. (메서드 호출의 트레이스와 똑같다고 보면 된다.) 메서드 실행이 끝나면 스택 프레임은 pop되어 스택에서 제거된다.
-        - **Native Internal Threads**
-        : 자바의 바이트코드가 아닌 다른 언어로 작성된 메서드를 성능 향상을 목적으로 컴파일해서 사용하는 경우 사용된다.
-- **Execution Engine**
-    : 로드된 class의 바이트코드를 실행하는 runtime module이다. class loader를 통해 jvm 내의 Runtime Data Area에 배치된 바이트코드는 Excution Engine에 의해 실행된다.
-  - **Garbage Collector**
-      : Heap 메모리 영역에 생성된 객체들 중 참조되지 않은 객체들을 제거 한다. System.gc()를 호출하여 실행할 수 있다. GC 동작시간은 정해져있지 않으므로 언제 제거하는지는 알 수 없다. GC를 수행하는 동안 GC Thread를 제외한 다른 모든 Thread는 일시 정지한다.
-  - **Interpreter**
-  - **JIT complier**
+  <img src= "https://tecoble.techcourse.co.kr/static/8620cd5d0bd1f37f2e603a5a5d763b39/2f3a8/2021-07-26-classloader-process.png" width= 400px>
+    
+- **bootstrap class loader** : 가장 먼저 실행되는 클래스 로더이다. 자바 실행에 기본적으로 필요한 클래스 즉 rt.jar 를 포함하여, JVM 을 구동시키기 위한 가장 필수적인 라이브러리의 클래스들을 로딩한다.
+- **extension class loader** : localedata, zipfs 등 다른 표준 핵심 Java Class 의 라이브러리 들을 로딩한다.(클래스들은 폴더 $JAVAHOME/jre/lib/ext_ 위치해 있다.)
+- **application class loader** : Classpath 에 있는 클래스를 로딩한다. classpath나 jar파일 내에 환경변수로 지정된 폴더 내 클래스를 로딩한다. (여기에 개발자들이 자바 코드로 짠 클래스 파일이 포함된다.)
+
+> 위의 각각의 ClassLoader 들을 모두 거쳤는데도, 클래스 파일을 찾지 못하게 되면, ClassNotFoundException 이라는 예외를 던진다.
+
+<!-- 이렇게 Loading 과정에서 하위 ClassLoader 가 로딩한 클래스 파일은 상위 ClassLoader 가 로딩한 클래스 파일을 볼 수가 있습니다. 하지만 반대는 불가능합니다. 이를 Visibility 라고 하며, 각각의 클래스 파일을 계층으로 관리해줄 수 있게 합니다. 또한, 한번 JVM 에 탑재된 클래스 파일은 종료될 때까지 JVM 에서 제거되지 않습니다.-->
+
+#### Linking (클래스 파일을 사용하기 위해 검증하고, 기본 값으로 초기화)
+
+- verification, preparation, resolution 단계로 이루어져있다.
+
+- **verification** : 읽어들인 바이트코드가 적절한지 확인한다. 실패시 java.lang.verifyError를 리턴
+- **preparation** : static 변수들에 메모리가 할당되고 타입에 따라 기본값을 할당한다.
+- **resolution** : 클래스의 `constant pool` 내의 **모든 symbolic reference**를 JVM 의 메모리 구성 요소인 **Method Area** 의 `runtime constant pool`을 통하여 **Direct Reference 라는 메모리 주소 값**으로 바꾼다. (해당 단계의 영향을 받는 JVM Instruction 요소는 new 및 instanceof 가 있다.)
+
+#### Initialization (static field 의 값들을 정의한 값으로 초기화)
+- Java 코드에서의 class 와 interface 의 static 변수 값들을 지정한 값들로 초기화 및 static block이 실행된다.
+
+
+## Runtime Data Area
+- JVM이 바이트코드를 실행하기 위해 사용하는 (OS로부터 별도로 할당 받은) 메모리 공간이다.
+- JVM 의 Runtime Data Areas 에는 크게 Method Area, Heap, Java Stacks, PC registers 그리고 Native Method Stacks로 나뉜다.
+
+  <img src= "https://tecoble.techcourse.co.kr/static/a0b18cc999920474a1852901e1e46ebf/6f641/2021-08-09-jvm-runtime-data-area-structure.png" width= 400px>
+
+### 모든 스레드가 공유
+
+#### Method Area
+- 클래스로더가 클래스 파일을 읽어왔을 때 클래스와 관련된 메타데이터를 저장하고 클래스 구조, 필드, 메서드와 같은 데이터를 저장한다.
+- Runtime Constant Pool 과 static 변수, 그리고 메소드 데이터와 같은 Class 데이터가 관리되는  곳이다.
+
+#### Heap
+- 런타임시, 동적으로 할당하여 사용하는 영역이다. 프로그램을 실행하면서 생성한 모든 객체 인스턴스를 저장한다.
+- 여기서 문자열에 대한 정보를 가진 `String Constant Pool`과 실제 데이터를 가진 인스턴스, 배열 등이 저장된다.
+
+### 각각의 스레드에 존재
+
+#### Stack
+- 자바 스택은 스레드 별로 존재하고 각 Thread 들은 메서드를 호출할 때마다 `Frame` 이라는 단위가 생성된다.
+- 메서드 실행이 끝나면 스택 프레임은 pop되어 스택에서 제거된다.
+- Frame 은 메서드에 대한 정보를 가지고 있는 Local Variable, Operand Stack 그리고 Constant Pool Reference 로 구성이 되어 있다.
+  - Local Variable : 메서드 안의 지역 변수를 가지고 있다.
+  - Operand Stack : 메서드 내 연산을 위해서 바이트 코드 명령문을 가지고 있다.
+  - Constant Pool Reference : Constant Pool 참조를 위한 공간이다.
+
+#### Program Counter Register
+
+- 현재 실행 중인 JVM 주소 정보를 저장한다.
+- 수행해야 하는 CPU 명령어 위치 정보를 저장한다.
+
+#### Native Method Stack
+- 자바의 바이트코드가 아닌 다른 언어로 작성된 메서드를 성능 향상을 목적으로 컴파일해서 사용하는 경우 사용된다.
+
+
+## Execution Engine
+- 로드된 class의 바이트코드를 실행하는 runtime module이다. class loader를 통해 jvm 내의 Runtime Data Area에 배치된 바이트코드는 Excution Engine에 의해 실행된다.
+
+## Garbage Collector
+- Heap 메모리 영역에 생성된 객체들 중 참조되지 않은 객체들을 제거 한다. System.gc()를 호출하여 실행할 수 있다. GC 동작시간은 정해져있지 않으므로 언제 제거하는지는 알 수 없다. GC를 수행하는 동안 GC Thread를 제외한 다른 모든 Thread는 일시 정지한다.
+## Interpreter
+## JIT compiler
+
 ---------------------------------
 # JDK와 JRE의 차이
 
