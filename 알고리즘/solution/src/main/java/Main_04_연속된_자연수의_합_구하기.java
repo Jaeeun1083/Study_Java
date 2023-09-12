@@ -1,3 +1,5 @@
+package main.java;
+
 import java.util.Scanner;
 
 public class Main_04_연속된_자연수의_합_구하기{
